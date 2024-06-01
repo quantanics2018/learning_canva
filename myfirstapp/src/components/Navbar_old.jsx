@@ -1,8 +1,8 @@
 import React from 'react'; 
 import Select from 'react-select'; 
-import './Navbar.css'; 
+import './Navbar_old.css'; 
 
-const Navbar = ({ userLang, setUserLang, userTheme, 
+const Navbar_old = ({ userLang, setUserLang, userTheme, 
 	setUserTheme, fontSize, setFontSize }) => { 
 	const languages = [ 
 		{ value: "c", label: "C" }, 
@@ -31,4 +31,4 @@ const Navbar = ({ userLang, setUserLang, userTheme,
 	) 
 } 
 
-export default Navbar
+export default Navbar_old

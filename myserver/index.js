@@ -20,11 +20,11 @@ app.use((req,res,next)=>{
 app.use('/auth', authRouter);
 app.use('/live', CodeRouter);
 
-// server listening checking function
-app.get('/auth',(req,res)=>{
-  res.send("index.js function working fine");
-  console.log("its working fine to index.js file");
-});
+// server listening checking  function
+// app.post('/auth',(req,res)=>{
+//   res.send(req.body.user_data);
+//   console.log("its working fine to index.js file");
+// });
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {

@@ -19,6 +19,8 @@ import TemplateDesign from './component_certificate/TemplateDesign.jsx';
 import UploadImage from './component_certificate/UploadImage.jsx';
 import Projects_template from './component_certificate/Projects_template.jsx';
 import Createcomponent from './component_certificate/Createcomponent.jsx';
+import Imageadd from './component_certificate/Imageadd.jsx';
+
 const custome_certificate = () =>{
 
     const [state,setState] = useState('');
@@ -31,6 +33,21 @@ const custome_certificate = () =>{
     const [color,setColor] = useState('');
     const [rotate,setRotate] = useState(0);
 
+    const [left,setLeft] = useState('');
+    const [top,setTop] = useState('');
+    const [width_s,setWidth] = useState('');
+    const [height,setHeight] = useState('');
+
+    
+    const [font,setFont] = useState('');
+    const [padding,setPadding] = useState('');
+    const [weight,setWeight] = useState('');
+    const [opacity,setOpacity] = useState('');
+    const [zIndex,setZindex] = useState('');
+    const [text,setText] = useState('');
+    const [radius,setRadius] = useState('');
+
+
     const seElements = (type,name)=>{
         setState(type);
         setShow({
@@ -40,16 +57,109 @@ const custome_certificate = () =>{
     }
 
 
-    const moveElement = () =>{
-        console.log("move");
+    const moveElement = (id,currentinfo) =>{
+       
+        setCurrentComponent(currentinfo);
+
+        let isMove = true;
+        const current_div = document.getElementById(id);
+
+
+        const mouseMove = ({movementX,movementY})=>{
+            const getStyle = window.getComputedStyle(current_div);
+           
+            const left = parseInt(getStyle.left);
+            const top = parseInt(getStyle.top);
+
+            if (isMove) {
+                current_div.style.left = `${left + movementX}px`;
+                current_div.style.top = `${top + movementY}px`;
+
+            }
+        }
+
+        const mouseUp = (e)=>{
+            isMove=false;
+            window.addEventListener('mousemove',mouseMove);
+            window.addEventListener('mouseup',mouseUp);
+            setLeft(parseInt(current_div.style.left));
+            setTop(parseInt(current_div.style.top));
+        }
+
+        window.addEventListener('mousemove',mouseMove);
+        window.addEventListener('mouseup',mouseUp);
     }
 
-    const resizeElement = () =>{
-        console.log("Resize element");
+    const resizeElement = (id,currentinfo) =>{
+       
+        setCurrentComponent(currentinfo);
+
+        let isMove = true;
+        const current_div = document.getElementById(id);
+
+
+        const mouseMove = ({movementX,movementY})=>{
+            const getStyle = window.getComputedStyle(current_div);
+           
+            const width = parseInt(getStyle.width);
+            const height = parseInt(getStyle.height);
+
+            if (isMove) {
+                current_div.style.width = `${width + movementX}px`;
+                current_div.style.height = `${height + movementY}px`;
+
+            }
+        }
+
+        const mouseUp = (e)=>{
+            isMove=false;
+            window.addEventListener('mousemove',mouseMove);
+            window.addEventListener('mouseup',mouseUp);
+            setWidth(parseInt(current_div.style.width));
+            setHeight(parseInt(current_div.style.height));
+        }
+
+        window.addEventListener('mousemove',mouseMove);
+        window.addEventListener('mouseup',mouseUp);
     }
 
-    const rotateElement = () =>{
-        console.log('reSize Element');
+    const rotateElement = (id,currentinfo) =>{
+        setCurrentComponent("");
+        setCurrentComponent(currentinfo);
+        const target = document.getElementById(id);
+
+
+        const mouseMove = ({ movementX, movementY })=>{
+            const getstyle = window.getComputedStyle(target);
+            const trans = getstyle.transform;
+            console.log("transform");
+            console.log(trans);
+            const values = trans.split('(')[1].split(')')[0].split(',')
+            const angle = Math.round( Math.atan2(values[1],values[0]) * (180/Math.PI) )
+            let deg = angle < 0 ? angle + 360 : angle
+            if (movementX) {
+                deg = deg + movementX
+            }
+
+            target.style.transform=`rotate(${deg}deg)`
+           
+        }
+
+        const mouseUp = (e)=>{
+            window.addEventListener('mousemove',mouseMove);
+            window.addEventListener('mouseup',mouseUp);
+
+            const getstyle = window.getComputedStyle(target);
+            const trans = getstyle.transform;
+            const values = trans.split('(')[1].split(')')[0].split(',')
+            const angle = Math.round(Math.atan2(values[1], values[0])*(180/Math.PI))
+            let deg = angle < 0 ? angle + 360 : angle
+            setRotate(deg)
+        }
+
+        window.addEventListener('mousemove',mouseMove);
+        window.addEventListener('mouseup',mouseUp);
+      
     }
 
     // shape function
@@ -68,7 +178,6 @@ const custome_certificate = () =>{
             z_index:2,
             color:'#3c3e3d',
             setCurrentComponent:(a)=>setCurrentComponent(a),
-            removeBackground:()=>setImage(''),
             moveElement,
             resizeElement,
             rotateElement,
@@ -95,23 +204,118 @@ const custome_certificate = () =>{
         setComponents(temp);
     }
 
+    const add_text = (type,shapename) =>{
+        const temp = Components.filter(c=>c.id!==current_component.id);
+       const style = {
+            id:Components.length+1,
+            name:type,
+            shapename,
+            left:10,
+            top:10,
+            right:10,
+            opacity:1,
+            rotate,
+            z_index:2,
+            padding:6,
+            font:22,
+            weight:400,
+            title:'Add Text',
+            color:'#3c3e3d',
+            setCurrentComponent:(a)=>setCurrentComponent(a),
+            moveElement,
+            resizeElement,
+            rotateElement,
+        }
+
+        setFont('');
+        setWeight('');
+        setCurrentComponent(style)
+        setComponents([...Components,style])
+    }
+
+    const add_image = (img)=>{
+        const style = {
+            id:Components.length+1,
+            name:'image',
+            type:'image',
+            left:10,
+            top:10,
+            right:10,
+            opacity:1,
+            width:200,
+            height:150,
+            rotate,
+            z_index:2,
+            image:img,
+            radius:8,
+            setCurrentComponent:(a)=>setCurrentComponent(a),
+            moveElement,
+            resizeElement,
+            rotateElement,
+        }
+        setCurrentComponent(style)
+        setComponents([...Components,style])
+    }
+
     useEffect(()=>{
-        console.log("useeffect color value is:\t"+color);
+        console.log("use effect calloing");
         if (current_component) {
             const index = Components.findIndex(c=>c.id===current_component.id);
             const temp = Components.filter(c=>c.id!==current_component.id);
+            
+
+            if(current_component.name !=='text'){
+                console.log(Components[index]);
+
+                Components[index].width = width_s || current_component.width
+                Components[index].height = height || current_component.height
+                Components[index].rotate = rotate || current_component.rotate
+            }
+
+            if(current_component.name ==='text'){
+                console.log(Components[index]);
+
+                Components[index].font = font || current_component.font
+                Components[index].weight = weight || current_component.weight
+                Components[index].padding = padding || current_component.padding
+                Components[index].title = text || current_component.title
+            }
+
             if(current_component.name==='main_frame' && bimage){
-                console.log("background image");
-                console.log(bimage.upload_img);
+               
                 Components[index].image=bimage.upload_img || current_component.image
             }
+
             Components[index].color=color || current_component.color
+            
+            
+            if (current_component!=='main_frame') {
+                Components[index].left = left || current_component.left
+                Components[index].top = top || current_component.top
+                Components[index].opacity = opacity || current_component.opacity
+                Components[index].z_index = zIndex || current_component.z_index
+            }
+
+            if(current_component==="image"){
+                Components[index].radius = radius || current_component.radius
+            }
+
+            
             // setComponents
-            console.log("selected color is:\t"+Components[index].color);
             setComponents([...temp,Components[index]]);
+
+            setColor('');
+            setHeight('');
+            setWidth('');
+            setTop('');
+            setLeft('');
+            setRotate(0);
+            setOpacity('');
+            setZindex('');
+            console.log("use effect calling end");
         }
 
-    },[color,bimage]);
+    },[color,bimage,left,top,height,width_s,opacity,zIndex,padding,weight,font,text,radius]);
 
     // remove background function 
     const removeBackground = () =>{
@@ -121,6 +325,11 @@ const custome_certificate = () =>{
         com.image='';
         setImage('');
         setComponents([...temp,com])
+    }
+
+    // set opacity function
+    const opacityHandle = (e)=>{
+        setOpacity(parseFloat(e.target.value))
     }
 
     return(
@@ -187,14 +396,14 @@ const custome_certificate = () =>{
                             <UploadImage />
                         ):state==='text'?(
                             <div className='grid grid-cols-1 gap-2'>
-                                <div className='bg-[#3c3e3d] cursor-pointer font-bold p-3 text-white text-xl rounded-sm'>
+                                <div onClick={()=>add_text('text','text')} className='bg-[#3c3e3d] cursor-pointer font-bold p-3 text-white text-xl rounded-sm'>
                                     <h2>Add a Text</h2>
                                 </div>
                             </div>
                         ):state==='project'?(
                             <Projects_template />
                         ):state==='initImage'?(
-                            <Projects_template />
+                            <Imageadd add_image={add_image} />
                         ):state==='background' &&(
                             <div className='h-full overflow-x-auto flex justify-start items-start '>
                             <div className='grid grid-cols-3 gap-2'>
@@ -232,6 +441,54 @@ const custome_certificate = () =>{
                                     {
                                         (current_component.name==='main_frame' && bimage)&&
                                         <button className='w-full px-[2px] py-[3px] bg-slate-600 text-white rounded-sm text-sm' onClick={removeBackground}>Remove Background</button>
+                                    }
+
+                                    {
+                                        (current_component.name!=='main_frame') && <div className='flex gap-3 flex-col'>
+                                            <div className='flex gap-1 justify-start items-start '>
+                                                <span className='text-md w-[70px] '>Opacity : </span>
+                                                <input className='w-[70px] border border-gray-700 bg-transparent outline-none px-2 rounded-md ' onChange={opacityHandle} type="number" step={0.1} min={0.1} max={1} value={current_component.opacity} />
+                                            </div>
+
+                                            <div className='flex gap-1 justify-start items-start '>
+                                                <span className='text-md w-[70px] '>Z-index : </span>
+                                                <input className='w-[70px] border border-gray-700 bg-transparent outline-none px-2 rounded-md ' onChange={(e)=>setZindex(parseInt(e.target.value))} type="number" step={1} value={current_component.z_index} />
+                                            </div>
+                                        </div>
+                                    }
+                                    {
+                                        (current_component.name==='text' ) && <>
+                                        <div className='flex gap-1 justify-start items-start'>
+                                            <span className='text-md w-[70px] '>Padding : </span>
+                                            <input step={1} onChange={(e)=>setPadding(parseInt(e.target.value))} type="number" className='w-[70px] border border-gray-700 bg-transparent outline-none px-2 rounded-md ' value={current_component.padding}/>
+                                        </div>
+
+                                        <div className='flex gap-1 justify-start items-start'>
+                                            <span className='text-md w-[70px] '>Font Size : </span>
+                                            <input step={1} onChange={(e)=>setFont(parseInt(e.target.value))} type="number" className='w-[70px] border border-gray-700 bg-transparent outline-none px-2 rounded-md ' value={current_component.font}/>
+                                        </div>
+
+
+                                        <div className='flex gap-1 justify-start items-start'>
+                                            <span className='text-md w-[70px] '>Font Weight : </span>
+                                            <input step={100} max={900} min={100} onChange={(e)=>setWeight(parseInt(e.target.value))} type="number" className='w-[70px] border border-gray-700 bg-transparent outline-none px-2 rounded-md ' value={current_component.weight}/>
+                                        </div>
+
+                                        <div className='flex gap-2 flex-col justify-start items-start '>
+                                            <input onChange={(e)=>setCurrentComponent({...current_component,title:e.target.value})} className='border border-gray-700 bg-transparent outline-none p-2 rounded-md' value={current_component.title} type="text" />
+                                            <button onClick={()=>setText(current_component.title)} className='px-4 py-2 bg-purple-500 text-xs text-white rounded-sm'>Add</button>
+                                        </div>
+                                        </>
+                                    }
+
+                                    {
+                                        (current_component.name==='image')&& <>
+                                        
+                                        <div className='flex gap-1 justify-start items-start '>
+                                            <span className='text-md w-[70px] '>Radius : </span>
+                                            <input className='w-[70px] border border-gray-700 bg-transparent outline-none px-2 rounded-md ' onChange={(e)=>setRadius(parseInt(e.target.value))} type="number" step={1} value={current_component.radius} />
+                                        </div>
+                                        </>
                                     }
                                 </div>
                             </div>

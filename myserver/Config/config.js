@@ -11,7 +11,7 @@ module.exports = {
     pgsql:{
         user: 'postgres',
         host: '127.0.0.1',
-        database: 'terion_billing',
+        database: 'quantanics_learning',
         password: 'quantanics123', //quantanics123
         port: 5432,
     },
