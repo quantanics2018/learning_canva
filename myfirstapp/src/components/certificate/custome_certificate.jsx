@@ -58,7 +58,8 @@ const custome_certificate = () =>{
 
 
     const moveElement = (id,currentinfo) =>{
-       
+       console.log("mouse move element");
+       console.log(currentinfo);
         setCurrentComponent(currentinfo);
 
         let isMove = true;
@@ -93,7 +94,8 @@ const custome_certificate = () =>{
     const resizeElement = (id,currentinfo) =>{
        
         setCurrentComponent(currentinfo);
-
+        console.log("mouse resize event called !!!");
+        console.log(currentinfo);
         let isMove = true;
         const current_div = document.getElementById(id);
 
@@ -126,6 +128,8 @@ const custome_certificate = () =>{
     const rotateElement = (id,currentinfo) =>{
         setCurrentComponent("");
         setCurrentComponent(currentinfo);
+        console.log("rotate element");
+        /*
         const target = document.getElementById(id);
 
 
@@ -159,7 +163,7 @@ const custome_certificate = () =>{
 
         window.addEventListener('mousemove',mouseMove);
         window.addEventListener('mouseup',mouseUp);
-      
+      */
     }
 
     // shape function

@@ -10,6 +10,7 @@ import Pagenotfound from './error/Pagenotfound';
 import Home_old from './components/Home_old';
 import Home_code from './components/code_compiler/Home_code';
 import Certificate from './components/certificate/custome_certificate';
+import Certificate_custome from './Customer_Certificate/Certificate_custome.jsx'
 
 import Home from './components/Home';
 
@@ -24,13 +25,15 @@ function App() {
       {/* <Login></Login> */}
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot_password" element={<Forgot_pass />}></Route>
           {/* <Route path="/index_page"  element={<Home_old />}></Route> */}
           <Route path="/code" element={<Home_code />}></Route>
           <Route path="/certificate*" element={<Certificate />}></Route>
           <Route path='/home' element={<Home />}></Route>
+
+          <Route path='/fabric' element={<Certificate_custome />}></Route>
 
         </Routes>
       </BrowserRouter>

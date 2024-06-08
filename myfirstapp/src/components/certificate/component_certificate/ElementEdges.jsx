@@ -3,7 +3,9 @@ import React from 'react'
 
 
 const ElementEdges =({id,info,exId}) => {
-
+    console.log("elements edges ");
+    console.log(id);
+    console.log(info);
     return(
         <>
         {

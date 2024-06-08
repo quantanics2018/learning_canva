@@ -12,6 +12,8 @@ const Createcomponent = ({info,current_component,removeComponent}) =>{
     // console.log(current_component)
 
     if (info.name==='main_frame') {
+        console.log("mainframe is selected ");
+        console.log(parseInt(info.width)>650)
         html=<div onClick={()=>info.setCurrentComponent(info)} className='hover:border-[2px] hover:border-indigo-500 shadow-md' style={{width:info.width+'px',height:info.height+'px',background:info.color,zIndex:info.z_index}}>
             {
                 info.image && <img src={info.image} className='w-full h-full ' alt="image" />
@@ -20,7 +22,8 @@ const Createcomponent = ({info,current_component,removeComponent}) =>{
     }
 
     if (info.name === 'shape' && info.shapename === 'rect') {
-        // console.log("rectangle shape is selected ");
+        console.log("rectangle shape is selected ");
+        console.log(info)
         html=<div id={randValue} onClick={()=>info.setCurrentComponent(info)} 
         className='absolute group hover:border-[2px] hover:border-indigo-500' 
         style={{
@@ -45,7 +48,8 @@ const Createcomponent = ({info,current_component,removeComponent}) =>{
     }
 
     if (info.name === 'shape' && info.shapename === 'circle') {
-        // console.log("rectangle shape is selected ");
+        console.log("circle shape is selected ");
+        console.log(info)
         html=<div id={randValue} onClick={()=>info.setCurrentComponent(info)} 
         className='absolute group hover:border-[2px] hover:border-indigo-500' 
         style={{
@@ -71,7 +75,8 @@ const Createcomponent = ({info,current_component,removeComponent}) =>{
     }
 
     if (info.name === 'shape' && info.shapename === 'triangle') {
-        // console.log("rectangle shape is selected ");
+        console.log("triangle shape is selected ");
+        console.log(info)
         html=<div id={randValue} onClick={()=>info.setCurrentComponent(info)} 
         className='absolute group hover:border-[2px] hover:border-indigo-500' 
         style={{
@@ -98,6 +103,8 @@ const Createcomponent = ({info,current_component,removeComponent}) =>{
     }
 
     if (info.name === 'text' ) {
+        console.log("text shape is selected ");
+        console.log(info)
         html=<div id={randValue} onClick={()=>info.setCurrentComponent(info)} 
         className='absolute group hover:border-[2px] hover:border-indigo-500' 
         style={{
@@ -121,6 +128,8 @@ const Createcomponent = ({info,current_component,removeComponent}) =>{
     }
 
     if (info.name=== 'image') {
+        console.log("image shape is selected ");
+        console.log(info)
         html=<div id={randValue} onClick={()=>info.setCurrentComponent(info)} 
         className='absolute group hover:border-[2px] hover:border-indigo-500' 
         style={{
