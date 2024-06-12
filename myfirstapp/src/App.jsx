@@ -30,10 +30,10 @@ function App() {
           <Route path="/forgot_password" element={<Forgot_pass />}></Route>
           {/* <Route path="/index_page"  element={<Home_old />}></Route> */}
           <Route path="/code" element={<Home_code />}></Route>
-          <Route path="/certificate*" element={<Certificate />}></Route>
+          <Route path="/certificate*" element={<Certificate_custome />}></Route>
           <Route path='/home' element={<Home />}></Route>
 
-          <Route path='/fabric' element={<Certificate_custome />}></Route>
+          <Route path='/fabric' element={<Certificate />}></Route>
 
         </Routes>
       </BrowserRouter>

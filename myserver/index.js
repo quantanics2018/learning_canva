@@ -3,10 +3,12 @@ const app = express();
 const authRouter = require('./Routes/auth');
 const cors = require('cors');
 const CodeRouter = require('./Routes/Code_run');
+const Certificate_route = require('./Routes/Certificate');
 
 app.use(express.json());
 app.use(cors());
-
+app.use(express.static('upload_img')); // Serve static files from the 'uploads' directory
+app.use('/upload_img', express.static('upload_img'));
 // Middleware to remove caching for all responses
 app.use((req,res,next)=>{
   res.setHeader('Cache-Control','no-cache , no-store must-revalidate');
@@ -19,10 +21,11 @@ app.use((req,res,next)=>{
 // Routes
 app.use('/auth', authRouter);
 app.use('/live', CodeRouter);
+app.use('/certificate',Certificate_route);
 
 // server listening checking  function
-// app.post('/auth',(req,res)=>{
-//   res.send(req.body.user_data);
+// app.post('/certificate/bimg',(req,res)=>{
+//   res.send(req.body);
 //   console.log("its working fine to index.js file");
 // });
 

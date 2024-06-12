@@ -1,8 +1,10 @@
 import React,{ useEffect, useRef, useState } from "react";
 import { fabric } from 'fabric';
 import upload_img from '../assets/certificate_img/upload_img/web.png';
-import Navbar from './Components/Navbar_certificate.jsx';
 
+import Navbar from './Components/Navbar_certificate.jsx';
+import api from '../utils/api.js';
+import axios from 'axios';
 // side navbar
 
 // side navbar icons imports
@@ -13,7 +15,7 @@ import { MdKeyboardArrowLeft, MdOutlineCloudUpload } from "react-icons/md";
 import { TfiText } from "react-icons/tfi";
 import { RxTransparencyGrid } from "react-icons/rx";
 import { FaRegFolderClosed } from "react-icons/fa6";
-
+import { jsPDF } from 'jspdf';
 
 const Certificate_custome = () =>{
     const canvasref = useRef(null);
@@ -24,9 +26,14 @@ const Certificate_custome = () =>{
         status:true,
         name:''
     });
+    const [bimages,setBImages] = useState([]);
+    const [cimage,setCImages] = useState([]);
+
+    const [orientation,setOrientation] = useState('landscape');
     const [state,setState] = useState('');
     const [canvabackground,setBackground] = useState('white');
     const [background_img,setBackgroundimg] = useState('');
+    const font_family =  ["Pacifico", "VT323", "Quicksand", "Inconsolata", "Arial", "Verdana", "Helvetica", "Garamond", "Courier New","Roboto"];
 
     const seElements = (type,name)=>{
         setState(type);
@@ -37,6 +44,34 @@ const Certificate_custome = () =>{
     }
 
     useEffect (() =>{
+
+
+        // background image axios
+        api.post('/certificate/bimg')
+        .then(response =>{
+            console.log("background images");
+            console.log(response.data);
+            if (response.data.status===true) {
+                setBImages(response.data.data);
+            }
+        })
+        .catch(error =>{
+            console.log("error axios images");
+        })
+
+        // canvas set images
+        api.post('/certificate/cimg')
+        .then(response =>{
+            console.log("canvas images");
+            console.log(response.data.status);
+            if (response.data.status===true) {
+                setCImages(response.data.data);
+            }
+        })
+        .catch(error =>{
+            console.log("axios error canva images");
+        })
+
         const canvasInstance = new fabric.Canvas(canvasref.current);
         canvasInstance.setBackgroundColor('white', canvasInstance.renderAll.bind(canvasInstance));
 
@@ -103,7 +138,8 @@ const Certificate_custome = () =>{
 
     const addImg = (e, url, canvi) => {
         e.preventDefault();
-        new fabric.Image.fromURL(url, img => {
+        let url_path = `http://localhost:8000/upload_img/image_canva/`+url;
+        new fabric.Image.fromURL(url_path, img => {
           img.scale(0.20);
             // var my_image = img.set({left:0,top:20,width:400,height:400});
           canvi.add(img);
@@ -112,19 +148,11 @@ const Certificate_custome = () =>{
         });
     }
 
-    const textsizechange = (value)=>{
-        console.log("text font isze value is:\t"+value);
-        canvas.getActiveObject().set("fontSize", value);
-    
-        canvas.renderAll();
-    }
 
-    const changeZindex = (value) =>{
-        console.log("zindex value is :\t"+value);
-        canvas.getActiveObject().set('Zindex',value);
-        canvas.renderAll();
-    }
 
+   
+
+   
     const changebackgroundcolor = (value)=>{
         console.log("backround color is :\t"+value);
        
@@ -135,7 +163,9 @@ const Certificate_custome = () =>{
     const changeBackgroundImage = (url) => {
         console.log("background image url is ");
         console.log(url);
-        fabric.Image.fromURL(url.upload_img, (img) => {
+        let url_path = `http://localhost:8000/upload_img/background_img/`+url;
+        console.log(url_path);
+        fabric.Image.fromURL(url_path, (img) => {
           canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
             scaleX: canvas.width / img.width,
             scaleY: canvas.height / img.height,
@@ -161,12 +191,78 @@ const Certificate_custome = () =>{
         canvas.requestRenderAll();
     }
 
+    const changefontproperty = (type,val)=>{
+        if (type==="fontweight") {
+            console.log("font weight value is:\t"+val);
+            canvas.getActiveObject().set('fontWeight',val);
+        }
+        else if(type==="zindex"){
+            console.log("zindex value is :\t"+val);
+            canvas.getActiveObject().set('Zindex',val);
+        }
+        else if(type==='fontsize'){
+            console.log("text font size value is:\t"+val);
+            canvas.getActiveObject().set("fontSize",val);
+        }
+        else if(type==='fontcolor'){
+            console.log("text font color value is:\t"+val);
+            canvas.getActiveObject().set("fill", val);  
+        }
+        else if(type==='fontfamily'){
+            console.log("text font family value is:\t"+val);
+            canvas.getActiveObject().set("fontFamily", val);  
+            canvas.requestRenderAll();
+        }
+
+
+        canvas.renderAll();
+    }
+
+    const downloadimge = ()=>{
+        let a = document.createElement('a')
+        let dt = canvas.toDataURL({
+          format: 'png',
+          quality: 1,
+        })
+        a.href = dt
+        a.download = 'canvas.png'
+        a.click()
+
+    }
+
+
+    const downloadpdf = ()=>{
+        const dataURL = canvas.toDataURL({
+            format: 'png',
+            multiplier: 2 // Increase the resolution if needed
+        });
+        // Create a new jsPDF instance
+        const pdf = new jsPDF(orientation, 'px', [canvas.width, canvas.height]);
+
+        // Add the image to the PDF
+        pdf.addImage(dataURL, 'PNG', 0, 0, canvas.width, canvas.height);
+
+        // Save the PDF
+        pdf.save('canvas.pdf');
+    }
+    
+
+    const uploadCustomeimg = () =>{
+        // alert('hi'); 
+        document.getElementById('upload_bimg').click();
+
+    }
+
+    const handleFileget = (event) => {
+        alert('hi');
+    };
+
     return(
         <>
             <div className='min-w-screen h-screen '>
                 <Navbar />
-                <div className='flex h-full w-100 bg-black'>
-                    <div className='flex flex-col w-[7%] bg-[#181918] z-50 h-full text-gray-500 '>
+                <div className='flex h-[91%] w-100 bg-black '>
+                    <div className='flex flex-col w-[7%] bg-[#181918] z-50 h-full text-gray-500 mt-14 pt-2'>
                         {/* <SideNavbar /> */}
                         <div onClick={() => seElements('design','design')} className={`${show.name==='design'?'bg-[#252627]':''} w-full h-[80px] cursor-pointer flex justify-center flex-col items-center gap-1 hover:text-gray-100`}>
                             <span className='text-2xl'><BsGrid1X2/></span>
@@ -205,7 +301,7 @@ const Certificate_custome = () =>{
                             <span className='text-xs font-medium px-1'>Background</span>
                         </div>
                     </div>
-                    <div className="flex w-[94%] h-full flex-row ">
+                    <div className="flex w-[94%] h-full flex-row mt-14 pt-1">
                         <div className={`${show.status?'p-0 -left-[350px]':'px-8 left-[74px] py-5'} bg-[#252627] h-full fixed transition-all w-[350px] z-30 duration-700`}>
                             <div onClick={()=>setShow({name:'',status:true})} className='flex absolute justify-center items-center bg-[#252627] w-[20px] -right-2 text-slate-300 top-[40%] cursor-pointer h-[100px] rounded-full '>< MdKeyboardArrowLeft /></div>
                             {state==='design'?( 
@@ -233,10 +329,12 @@ const Certificate_custome = () =>{
                             ):state==='initImage'?(
                                  <div className='h-full overflow-x-auto flex justify-start items-start '>
                                     <div className='grid grid-cols-3 gap-2'>
+                                        {console.log("canvas images 1234")}
+                                        {console.log(cimage)}
                                         {
-                                            [1,2,3,4,5,6,7,8,9,0,11,22,33,44,55,66].map((img,i)=>
-                                            <div onClick={(e)=>addImg(e,upload_img,canvas)} className='w-full h-[100px] overflow-hidden rounded-sm cursor-pointer '>
-                                                <img src={upload_img} alt="" className='h-full w-full object-fit '/>
+                                            cimage.map((img,i)=>
+                                            <div onClick={(e)=>addImg(e,img.filename,canvas)} className='w-full h-[100px] overflow-hidden rounded-sm cursor-pointer '>
+                                                <img src={`http://localhost:8000/upload_img/image_canva/${img.filename}`} alt="" key={i} className='h-full w-full object-fit '/>
                                             </div>
                                             )
                                         }
@@ -244,42 +342,100 @@ const Certificate_custome = () =>{
                                     </div>
                                 </div>
                             ):state==='background' &&(
+                                <>
+                                <div className='w-full h-[40px] flex justify-center items-center bg-purple-500 rounded-sm text-white mb-3'>
+                                    <label htmlFor="" className='text-center cursor-pointer' onClick={uploadCustomeimg}>Upload Image</label>
+                                    <input type="file" id='upload_bimg' className='hidden' onChange={handleFileget}/>
+                                </div>
                                 <div className='h-full overflow-x-auto flex justify-start items-start '>
                                     <div className='grid grid-cols-3 gap-2'>
                                         {
-                                            [1,2,3,4,5,6,7,8,9,0,11,22,33,44,55,66].map((img,i)=>
-                                            <div onClick={()=>changeBackgroundImage({upload_img})} className='w-full h-[100px] overflow-hidden rounded-sm cursor-pointer '>
-                                                <img src={upload_img} alt="" className='h-full w-full object-fit '/>
+                                            bimages.map((img,i)=>
+                                            
+                                            <div onClick={()=>changeBackgroundImage(img.filename)} className='w-full h-[100px] overflow-hidden rounded-sm cursor-pointer '>
+                                                <img src={`http://localhost:8000/upload_img/background_img/${img.filename}`} key={i} alt="" className='h-full w-full object-fit '/>
                                             </div>
                                             )
                                         }
                                         {/* <h2>Backround image in canvas</h2> */}
                                     </div>
                                 </div>
+                                </>
                             )}
                         </div>
                         <div className="h-full w-full flex flex-row ">
-                            <div className="flex justify-center items-center relative h-full w-[80%] overflow-hidden ">
+                            <div className="flex justify-center items-center relative h-full w-[80%] overflow-hidden bg-black">
                                 <canvas ref={canvasref} width={800} height={500} />
                             </div>
-                            <div className="flex flex-col justify-start  relative h-full w-[20%] overflow-hidden bg-[#252627]">
-                                <h2 className="flex w-[100%] h-max justify-center text-white mb-3">Canva Properties</h2>
-                                <div className="flex flex-row justify-between items-center p-2 text-white">
-                                    <span >Background Color</span>
-                                    <input type="color" name="color" id="color"  onChange={(e)=>changebackgroundcolor(e.target.value)}  height={200} width={200}/>
-                                </div>
-                                <div className="flex flex-row w-[100%] p-2 mb-3">
-                                    <button className="text-white bg-[#181918] w-full p-2 rounded-md" onClick={deletecurrentobject}> Remove object</button>
-                                </div>
+                            <div className="h-full w-[20%] flex justify-start items-center  bg-[#252627] ">
+                                <div className="h-full overflow-x-auto flex justify-start items-start w-[100%] ">
+                                    <div className="grid grid-cols-1 gap-2 py-4">
+                                        <h2 className="flex w-[100%] h-max justify-center text-white mb-3">Canva Properties</h2>
+                                        <div className="flex flex-row justify-between items-center p-2 text-white">
+                                            <span >Background Color</span>
+                                            <input type="color" name="color" id="color"  onChange={(e)=>changebackgroundcolor(e.target.value)}  height={200} width={200}/>
+                                        </div>
+                                        <div className="flex flex-row w-[100%] p-2 mb-3">
+                                            <button className="text-white bg-[#181918] w-full p-2 rounded-md" onClick={deletecurrentobject}> Remove object</button>
+                                        </div>
 
-                                <div className="flex flex-row w-[100%] p-2 mb-3">
-                                    <button className="text-white bg-[#181918] w-full p-2 rounded-md" onClick={removeBackgroundImage}> Remove BackgroundIMage</button>
-                                </div>
+                                        <div className="flex flex-row w-[100%] p-2 mb-3">
+                                            <button className="text-white bg-[#181918] w-full p-2 rounded-md" onClick={removeBackgroundImage}> Remove BackgroundIMage</button>
+                                        </div>
+
+                                        <h2 className="flex w-[100%] h-max justify-center text-white mb-3">Font Properties</h2>
+
+                                        <div className="flex flex-row w-[100%] p-2 mb-2">
+                                            <input type="number" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 " placeholder="Font Size"  min={12} max={60} onChange={(e)=>changefontproperty('fontsize',e.target.value)}/>
+                                        </div>
+                                        <div className="flex flex-row w-[100%] p-2 mb-2">
+                                            <input type="number" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 " placeholder="ZIndex" onChange={(e)=>changefontproperty('zindex',e.target.value)} />
+                                        </div>
+                                        <div className="flex flex-row justify-between items-center p-2 text-white">
+                                            <span >Font Color</span>
+                                            <input type="color" name="color" id="color"  onChange={(e)=>changefontproperty('fontcolor',e.target.value)}  height={200} width={200}/>
+                                        </div>
+                                        <div className="flex flex-row w-[100%] p-2 mb-2">
+                                            <input type="number" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 " onChange={(e)=>changefontproperty('fontweight',e.target.value)} min={100} max={1000} placeholder="Font Weight" />
+                                        </div>
+
+                                        <div className="flex flex-row w-[100%] p-2 mb-2">
+                                            <form className="w-[100%] mx-auto">
+                                                <select name="" id="fontfamily" onChange={(e)=>changefontproperty('fontfamily',e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                                    <option selected>Choose Font Family</option>
+                                                    {
+                                                    font_family.map((item,index)=>
+                                                        <option value={item}>{item}</option>
+                                                    )
+                                                }
+                                                </select>
+                                            </form>
+                                        </div>
+
+                                        <h2 className="flex w-[100%] h-max justify-center text-white mb-3">Download  Properties</h2>
+
+                                        <div className="flex flex-row p-2 mb-2 justify-between items-center ">
+                                            {console.log(orientation==='landscape')}
+                                            <button className={`text-white ${orientation==='landscape'?'bg-[#181918] p-2 rounded rounded-o`':'transparent'} w-[45%] `} onClick={(e)=>{setOrientation('landscape')}}>Landscape</button>
+                                            <button className={`text-white ${orientation==='portrait'?'bg-[#181918] p-2 rounded rounded-o`':'transparent'} w-[45%] `} onClick={(e)=>{setOrientation('portrait')}}>Portrait</button>
+
+                                        </div>
+
+                                        <div className="flex flex-row p-2 mb-2 justify-center items-center">
+                                            <a href="#" className="text-white bg-[#181918] w-full p-2 rounded-md" onClick={downloadimge}>SaveImage</a>
+                                        </div>
+
+                                        <div className="flex flex-row p-2 mb-2 justify-center items-center">
+                                            <button className="text-white bg-[#181918] w-full p-2 rounded-md" onClick={downloadpdf}>SavePdf</button>
+                                        </div>
+                                    </div>
+                               </div>
+
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className="flex flex-row justify-between items-center w-full">
+                {/* <div className="flex flex-row justify-between items-center w-full">
                     <button onClick={addRectangle}>AddRectangle</button>
                     <button onClick={addCircle}>add Circle</button>
                     <button onClick={addtext}>AddText</button>
@@ -287,10 +443,10 @@ const Certificate_custome = () =>{
                     <button onClick={(e)=>addImg(e,upload_img,canvas)}>AddImage</button>
                     <input type="text" name="text" id="text" onChange={(e)=>textsizechange(e.target.value)} placeholder="FOnt Size"/>
                     <input type="text" name="zindex" id="zindex" onChange={(e)=>changeZindex(e.target.value)} placeholder="Enter Z-Index" />
-                    {/* <input type="color" name="color" id="color" onChange={(e)=>changebackgroundcolor(e.target.value)}  height={200} width={200}/> */}
+                    <input type="color" name="color" id="color" onChange={(e)=>changebackgroundcolor(e.target.value)}  height={200} width={200}/>
 
                     
-                </div>
+                </div> */}
                
 
                 {/* <canvas ref={canvasref} width={800} height={600} /> */}
