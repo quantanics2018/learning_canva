@@ -5,6 +5,7 @@ const config = require('../Config/config');
 
 const fs = require('fs');
 const path = require('path');
+const multer = require('multer');
 
 
 
@@ -41,4 +42,17 @@ async function canva_img(req,res){
         res.json({status:true,message:'canva  images lists',data:images});
     });
 }
-module.exports =  { background_img , canva_img }; 
+
+
+// insert background images
+async function insert_bimg(req,res){
+    if (req.file) {
+        console.log('File received:', req.file);
+        res.json({status:true,code:200, message: 'File uploaded successfully', filename: req.file.filename });
+      } else {
+        console.log(req.file)
+        console.log('No file received');
+        res.json({status:false,code:500,message:'Error uploading file'});
+      }
+}
+module.exports =  { background_img , canva_img , insert_bimg }; 

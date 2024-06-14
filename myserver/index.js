@@ -6,7 +6,7 @@ const CodeRouter = require('./Routes/Code_run');
 const Certificate_route = require('./Routes/Certificate');
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin: '*'}));
 app.use(express.static('upload_img')); // Serve static files from the 'uploads' directory
 app.use('/upload_img', express.static('upload_img'));
 // Middleware to remove caching for all responses

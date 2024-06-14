@@ -19,7 +19,9 @@ import { jsPDF } from 'jspdf';
 
 const Certificate_custome = () =>{
     const canvasref = useRef(null);
-
+    const [selectedFilebimg, setSelectedFilebimg] = useState(null);
+    const [uploadStatus, setUploadStatus] = useState('');
+    const [bimg_submit_status,setBimg_submit_status] = useState(false);
     const [canvas,setCanvas] = useState(null);
     const [imgURL, setImgURL] = useState('');
     const [show,setShow] = useState({
@@ -47,17 +49,7 @@ const Certificate_custome = () =>{
 
 
         // background image axios
-        api.post('/certificate/bimg')
-        .then(response =>{
-            console.log("background images");
-            console.log(response.data);
-            if (response.data.status===true) {
-                setBImages(response.data.data);
-            }
-        })
-        .catch(error =>{
-            console.log("error axios images");
-        })
+        getbackground_images();       
 
         // canvas set images
         api.post('/certificate/cimg')
@@ -86,7 +78,20 @@ const Certificate_custome = () =>{
 
     },[]);
 
-
+    // get background images function
+    const getbackground_images  = ()=>{
+        api.post('/certificate/bimg')
+        .then(response =>{
+            console.log("background images");
+            console.log(response.data);
+            if (response.data.status===true) {
+                setBImages(response.data.data);
+            }
+        })
+        .catch(error =>{
+            console.log("error axios images");
+        })
+    }
     const addRectangle = ()=>{
         const rect = new fabric.Rect({
             left:Math.random()*400,
@@ -145,7 +150,7 @@ const Certificate_custome = () =>{
           canvi.add(img);
           canvi.renderAll();
           setImgURL('');
-        });
+        },{ crossOrigin: 'Anonymous' });
     }
 
 
@@ -161,16 +166,20 @@ const Certificate_custome = () =>{
     }
 
     const changeBackgroundImage = (url) => {
-        console.log("background image url is ");
-        console.log(url);
-        let url_path = `http://localhost:8000/upload_img/background_img/`+url;
+        console.log("background image url is ", url);
+        let url_path = `http://localhost:8000/upload_img/background_img/${url}`;
         console.log(url_path);
+
         fabric.Image.fromURL(url_path, (img) => {
-          canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-            scaleX: canvas.width / img.width,
-            scaleY: canvas.height / img.height,
-          });
-        });
+            img.set({
+                crossOrigin: 'Anonymous', // Ensure CORS is handled
+            });
+
+            canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+                scaleX: canvas.width / img.width,
+                scaleY: canvas.height / img.height,
+            });
+        }, { crossOrigin: 'Anonymous' }); // Ensure CORS is handled when loading the image
     };
 
     // change background image
@@ -219,14 +228,11 @@ const Certificate_custome = () =>{
     }
 
     const downloadimge = ()=>{
-        let a = document.createElement('a')
-        let dt = canvas.toDataURL({
-          format: 'png',
-          quality: 1,
-        })
-        a.href = dt
-        a.download = 'canvas.png'
-        a.click()
+        let a = document.createElement('a');
+        let dt = canvas.toDataURL({format:'png', quality:1,});
+        a.href = dt;
+        a.download = 'canvas.png';
+        a.click();
 
     }
 
@@ -247,15 +253,45 @@ const Certificate_custome = () =>{
     }
     
 
-    const uploadCustomeimg = () =>{
-        // alert('hi'); 
-        document.getElementById('upload_bimg').click();
 
-    }
 
     const handleFileget = (event) => {
-        alert('hi');
+        setSelectedFilebimg(event.target.files[0]);
+        setBimg_submit_status(true);
+        setUploadStatus('');
     };
+
+    const insert_bimg = () => {
+        // alert('hi');
+        if (!selectedFilebimg) {
+            console.log("image not found");
+            setUploadStatus('please select image');
+            alert('image not found');
+            return;
+        }else if(selectedFilebimg){
+            const formData = new FormData();
+            formData.append("image", selectedFilebimg);
+            api.post('/certificate/upload_img/background_img',formData,{ 
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+            .then(response =>{
+                // console.log("canvas images");
+                // console.log(response.data.status);
+                if (response.data.status===true) {
+                    getbackground_images();
+                    console.log("background image insertion success");
+                    document.getElementById('file_input').value='';
+
+                }
+
+            })
+            .catch(error =>{
+                console.log("axios error canva background images insertion");
+            })
+        }
+    }
 
     return(
         <>
@@ -313,7 +349,13 @@ const Certificate_custome = () =>{
                                     <div  onClick={addRectangle} className='h-[99px] bg-[#3c3e3d] cursor-pointer '></div>
                                     <div  onClick={addCircle} className='h-[90px] bg-[#3c3e3d] cursor-pointer rounded-full'></div>
                                     <div  onClick={addTriangle} className='h-[90px] bg-[#3c3e3d] cursor-pointer' style={{clipPath:'polygon(50% 0,100% 100%,0 100%)'}}></div>
-                                    <div  className='h-[58px] bg-[#3c3e3d] cursor-pointer rounded-full'></div>
+                                    {/* oval css */}
+                                    <div  className='h-[60px] w-100px bg-[#3c3e3d] cursor-pointer rounded-full'></div>
+                                    {/* Parallelogram  */}
+                                    <div className="h-[60px] w-[100px] transform bg-[#3c3e3d] skew-x-12 "></div>
+                                    {/* rectangle */}
+                                    <div className="w-[100px] h-[60px] bg-[#3c3e3d] ml-3"></div>
+                                    {/*  */}
                                     
                                 </div>
                             ):state ==='image'?(
@@ -343,9 +385,10 @@ const Certificate_custome = () =>{
                                 </div>
                             ):state==='background' &&(
                                 <>
-                                <div className='w-full h-[40px] flex justify-center items-center bg-purple-500 rounded-sm text-white mb-3'>
-                                    <label htmlFor="" className='text-center cursor-pointer' onClick={uploadCustomeimg}>Upload Image</label>
-                                    <input type="file" id='upload_bimg' className='hidden' onChange={handleFileget}/>
+                                <div className='w-full h-max flex flex-col justify-center items-center  mb-3'>
+                                    <input className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" onChange={handleFileget} id="file_input" type="file" />
+                                    <button className="bg-purple-700 w-full h-[30px] mt-2 text-white rounded-sm " onClick={insert_bimg} disabled={!bimg_submit_status}>Upload Image</button>
+                                    {/* <p>{uploadStatus}</p> */}
                                 </div>
                                 <div className='h-full overflow-x-auto flex justify-start items-start '>
                                     <div className='grid grid-cols-3 gap-2'>
